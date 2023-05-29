@@ -96,6 +96,18 @@ class Color:
         self.multiply([x, 0, 0, 0, x, 0, 0, 0, x])
 
     def contrast(self, x=1):
+        """
+        Adjust the contrast of the color.
+
+        Parameters
+        ----------
+        x : int >= 0
+            A value of 0 makes the color grey, 1 (i.e. 100%) has no effect, and values over 1 create a contrast.
+
+        Returns
+        -------
+
+        """
         intercept = tuple(127.5 * (1 - x) for i in range(3))
         self.multiply([x, 0, 0, 0, x, 0, 0, 0, x], intercept)
 
