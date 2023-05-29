@@ -82,9 +82,9 @@ class Color:
     def brightness(self, value=1):
         self.multiply([value, 0, 0, 0, value, 0, 0, 0, value])
 
-    def contrast(self, value=1):
-        intercept = tuple((-(0.5 * value) + 0.5) * 255 for i in range(3))
-        self.multiply([value, 0, 0, 0, value, 0, 0, 0, value], intercept)
+    def contrast(self, x=1):
+        intercept = tuple((-(0.5 * x) + 0.5) * 255 for i in range(3))
+        self.multiply([x, 0, 0, 0, x, 0, 0, 0, x], intercept)
 
     def clamp(self, value):
         return min(255, max(0, value))
