@@ -40,47 +40,60 @@ class Color:
             0.072 + cos * 0.928 + sin * 0.072,
         ])
 
-    def grayscale(self, value=1):
+    def grayscale(self, x=1):
         self.multiply([
-            0.2126 + 0.7874 * (1 - value),
-            0.7152 - 0.7152 * (1 - value),
-            0.0722 - 0.0722 * (1 - value),
-            0.2126 - 0.2126 * (1 - value),
-            0.7152 + 0.2848 * (1 - value),
-            0.0722 - 0.0722 * (1 - value),
-            0.2126 - 0.2126 * (1 - value),
-            0.7152 - 0.7152 * (1 - value),
-            0.0722 + 0.9278 * (1 - value),
+            0.2126 + 0.7874 * (1 - x),
+            0.7152 - 0.7152 * (1 - x),
+            0.0722 - 0.0722 * (1 - x),
+            0.2126 - 0.2126 * (1 - x),
+            0.7152 + 0.2848 * (1 - x),
+            0.0722 - 0.0722 * (1 - x),
+            0.2126 - 0.2126 * (1 - x),
+            0.7152 - 0.7152 * (1 - x),
+            0.0722 + 0.9278 * (1 - x),
         ])
 
-    def sepia(self, value=1):
+    def sepia(self, x=1):
         self.multiply([
-            0.393 + 0.607 * (1 - value),
-            0.769 - 0.769 * (1 - value),
-            0.189 - 0.189 * (1 - value),
-            0.349 - 0.349 * (1 - value),
-            0.686 + 0.314 * (1 - value),
-            0.168 - 0.168 * (1 - value),
-            0.272 - 0.272 * (1 - value),
-            0.534 - 0.534 * (1 - value),
-            0.131 + 0.869 * (1 - value),
+            0.393 + 0.607 * (1 - x),
+            0.769 - 0.769 * (1 - x),
+            0.189 - 0.189 * (1 - x),
+            0.349 - 0.349 * (1 - x),
+            0.686 + 0.314 * (1 - x),
+            0.168 - 0.168 * (1 - x),
+            0.272 - 0.272 * (1 - x),
+            0.534 - 0.534 * (1 - x),
+            0.131 + 0.869 * (1 - x),
         ])
 
-    def saturate(self, value=1):
+    def saturate(self, x=1):
         self.multiply([
-            0.213 + 0.787 * value,
-            0.715 - 0.715 * value,
-            0.072 - 0.072 * value,
-            0.213 - 0.213 * value,
-            0.715 + 0.285 * value,
-            0.072 - 0.072 * value,
-            0.213 - 0.213 * value,
-            0.715 - 0.715 * value,
-            0.072 + 0.928 * value,
+            0.213 + 0.787 * x,
+            0.715 - 0.715 * x,
+            0.072 - 0.072 * x,
+            0.213 - 0.213 * x,
+            0.715 + 0.285 * x,
+            0.072 - 0.072 * x,
+            0.213 - 0.213 * x,
+            0.715 - 0.715 * x,
+            0.072 + 0.928 * x,
         ])
 
-    def brightness(self, value=1):
-        self.multiply([value, 0, 0, 0, value, 0, 0, 0, value])
+    def brightness(self, x=1):
+        """
+        Adjust the brightness of the color, by applying a linear multiplier.
+
+        Parameters
+        ----------
+        x : int >= 0
+            Linear multiplier, with 0 creating a completely black color, 1 (i.e. 100%) having no effect,
+            and values over 1 brightening the color.
+
+        Returns
+        -------
+
+        """
+        self.multiply([x, 0, 0, 0, x, 0, 0, 0, x])
 
     def contrast(self, x=1):
         intercept = tuple(127.5 * (1 - x) for i in range(3))
@@ -95,10 +108,10 @@ class Color:
         b = self.r * matrix[6] + self.g * matrix[7] + self.b * matrix[8] + vector[2]
         self.set(r, g, b)
 
-    def invert(self, value=1):
-        r = (value + self.r / 255 * (1 - 2 * value)) * 255
-        g = (value + self.g / 255 * (1 - 2 * value)) * 255
-        b = (value + self.b / 255 * (1 - 2 * value)) * 255
+    def invert(self, x=1):
+        r = (x + self.r / 255 * (1 - 2 * x)) * 255
+        g = (x + self.g / 255 * (1 - 2 * x)) * 255
+        b = (x + self.b / 255 * (1 - 2 * x)) * 255
         self.set(r, g, b)
         return
 
