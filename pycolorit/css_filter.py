@@ -151,7 +151,6 @@ class Solver:
     def __init__(self, target_color: Color):
         self.target = target_color
         self.target_hsl = target_color.rgb_to_hsl()
-        self._temp_color = Color(0, 0, 0)
 
     def solve(self):
         curr_result = self.solve_narrow(self.solve_wide())
@@ -228,8 +227,7 @@ class Solver:
         return value
 
     def loss(self, filters):
-        color = self._temp_color
-        color.set(0,0,0)
+        color = Color(0, 0, 0)
         color.invert(filters[0] / 100)
         color.sepia(filters[1] / 100)
         color.saturate(filters[2] / 100)
