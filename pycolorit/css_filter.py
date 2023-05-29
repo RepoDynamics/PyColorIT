@@ -83,7 +83,7 @@ class Color:
         self.multiply([value, 0, 0, 0, value, 0, 0, 0, value])
 
     def contrast(self, x=1):
-        intercept = tuple((-(0.5 * x) + 0.5) * 255 for i in range(3))
+        intercept = tuple(127.5 * (1 - x) for i in range(3))
         self.multiply([x, 0, 0, 0, x, 0, 0, 0, x], intercept)
 
     def clamp(self, value):
