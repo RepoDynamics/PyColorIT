@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, Literal
 import jax
 import numpy as np
 import jax.numpy as jnp
@@ -10,38 +10,33 @@ class Color:
         self._values = values
         return
 
-    @property
-    def rgb(self) -> np.ndarray:
-        return self._values
+    def rgb(
+            self,
+            unit: Literal['int', 'percent', 'fraction'] = 'int',
+            as_str: bool = False,
+            with_comma: bool = True
+    ) -> np.ndarray:
+        rgb_colors = self._values
+        sep = ', ' if with_comma else ' '
+        if unit == 'int':
+            if not as_str:
+                return rgb_colors
+            return np.array([f'rgb({sep.join(color)})' for color in rgb_colors.astype(str)])
+        rgb_colors_norm = rgb_colors / 255
+        if unit == 'percent':
+            rgb_colors_norm *= 100
+        if not as_str:
+            return rgb_colors_norm
+        return np.array(
+            [
+                f'rgb({sep.join(color)})'
+                for color in np.char.mod("%.1f%%" if unit == 'percent' else "%.1f", rgb_colors_norm)
+            ]
+        )
 
     @property
     def hsl(self):
-        norm = self.rgb / 255
-        maxes = norm.max(axis=1)
-        mins = norm.min(axis=1)
-        dists = maxes - mins
-        sums = maxes + mins
-        # Calculate all 'L' values, and create array with 'H' and 'S' values all set to zero.
-        init_hsls = np.pad((maxes + mins) / 2, pad_width=((0, 0), (2, 0)), mode='constant', constant_values=0)
-        # For cases where max. values and min. values are not the same, 'H' and 'S' values are non-zero
-        #  and must be calculated:
-        mask = dists != 0
-        sel_dists = dists[mask]
-        sel_norm = norm[mask]
-        sel_ls = init_hsls[mask, 2]
-        sel_sums = sums[mask]
-        # Set 'S' values
-        init_hsls[mask, 1] = np.where(sel_ls > 0.5, sel_dists / (2 - sel_sums), sel_dists / sel_sums)
-        # Set 'H' values
-        sel_maxes = maxes[mask]
-        init_hsls[mask, 0] = np.where(
-            sel_maxes == sel_norm[:, 0],
-            (sel_norm[:, 1] - sel_norm[:, 2]) / s
-        )
-        return
-
-    def hsl2(self):
-        return
+        return _rgb_to_hsl(rgb=self._values)
 
 
 
@@ -76,7 +71,7 @@ def hexa(values: str | Sequence[str]) -> Color:
         raise ValueError(
             f"`values` must either be a string, or a 1-dimensional sequence. The input dimension was {colors.ndim}"
         )
-    colors = np.char.lstrip('#')
+    colors = np.char.lstrip(colors, '#')
     colors_rgb = np.empty(shape=(colors.size, 3), dtype=np.ubyte)
     for i, color in enumerate(colors):
         colors_rgb[i] = process_single_hex(color)
@@ -84,29 +79,45 @@ def hexa(values: str | Sequence[str]) -> Color:
 
 
 @jax.jit
-def _rgb_to_hsl(colors: jnp.ndarray):
-    norm = colors / 255
-    max_val = jnp.max(norm, axis=-1)
-    min_val = jnp.min(norm, axis=-1)
+def _rgb_to_hsl(rgb: jax.Array):
+    """
+    Calculate HSL values from RGB values.
+
+    Parameters
+    ----------
+    rgb : jax.Array, shape: (3, ) or (n, 3)
+        Array of RGB values, for either one color, or a series of colors.
+
+    Returns
+    -------
+    hsl_colors : jax.Array
+        Array of HSL values with the same shape as `colors`.
+    """
+    norm = rgb / 255
+    rs, gs, bs = norm[..., 0], norm[..., 1], norm[..., 2]
+    max_val = jnp.max(norm, axis=-1)  # max(r, g, b) for each color
+    min_val = jnp.min(norm, axis=-1)  # min(r, g, b) for each color
     minmax_sum = max_val + min_val
     minmax_dist = max_val - min_val
+    # Calculate all 'L' values.
     hsl_l = minmax_sum / 2
+    # For cases where max and min values are not the same,
+    #   'H' and 'S' values are non-zero and must be calculated.
+    # Calculate all 'S' values.
+    # Here conditioning on `minmax_dist == 0` is not necessary, since the numerator is `minmax_dist`
     hsl_s = jnp.where(
         hsl_l > 0.5,
         minmax_dist / (2 - minmax_sum),
         minmax_dist / minmax_sum
     )
+    # Calculate all 'H' values.
     hsl_h = jnp.where(
         minmax_dist == 0,
         0,
         jnp.where(
-            max_val == norm[..., 0],
-            (norm[..., 1] - norm[..., 2]) / minmax_dist + jnp.where(norm[..., 1] < norm[..., 2], 6, 0),
-            jnp.where(
-                max_val == norm[..., 1],
-                (norm[..., 2] - norm[..., 0]) / minmax_dist + 2,
-                (norm[..., 0] - norm[..., 1]) / minmax_dist + 4,
-            )
+            max_val == rs,
+            jnp.where(gs < bs, 6, 0) + (gs - bs) / minmax_dist,
+            jnp.where(max_val == gs, (bs - rs) / minmax_dist + 2, (rs - gs) / minmax_dist + 4)
         )
     ) / 6
     return jnp.stack([hsl_h, hsl_s, hsl_l], axis=-1) * 100
