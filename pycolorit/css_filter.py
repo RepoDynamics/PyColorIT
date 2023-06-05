@@ -132,7 +132,6 @@ class Color:
         max_value = max(r, g, b)
         min_value = min(r, g, b)
         h, s, l = 0, 0, (max_value + min_value) / 2
-
         if max_value != min_value:
             d = max_value - min_value
             s = d / (2 - max_value - min_value) if l > 0.5 else d / (max_value + min_value)
@@ -143,7 +142,6 @@ class Color:
             else:
                 h = (r - g) / d + 4
             h /= 6
-
         return h * 100, s * 100, l * 100
 
 
@@ -153,7 +151,7 @@ class Solver:
         self.target_hsl = target_color.rgb_to_hsl()
 
     def solve(self):
-        curr_result = self.solve_narrow(self.solve_wide())
+        curr_result = {'loss': float('inf')}
         for i in range(100):
             if curr_result['loss'] < 1:
                 break
