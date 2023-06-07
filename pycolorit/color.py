@@ -34,6 +34,13 @@ class Color:
             ]
         )
 
+    def hex(
+            self,
+            with_hash: bool = False,
+    ):
+        sep = '#' if with_hash else ''
+        return np.array([f'{sep}{rgb[0]:02X}{rgb[1]:02X}{rgb[2]:02X}' for rgb in self._values])
+
     @property
     def hsl(self):
         return _rgb_to_hsl(rgb=self._values)
@@ -59,7 +66,7 @@ def hexa(values: str | Sequence[str]) -> Color:
         if len(val) == 3:
             val = ''.join([d * 2 for d in val])
         elif len(val) != 6:
-            raise ValueError("Hex color not recognized.")
+            raise ValueError(f"Hex color '{val}' not recognized.")
         return tuple(int(val[i:i + 2], 16) for i in range(0, 5, 2))
 
     colors = np.asarray(values)
