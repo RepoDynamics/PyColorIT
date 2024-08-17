@@ -2,9 +2,8 @@
 
 References
 ----------
-* Code is re-implemented from JavaScript: https://codepen.io/sosuke/pen/Pjoqqp
+- Code is re-implemented from JavaScript: https://codepen.io/sosuke/pen/Pjoqqp
 """
-
 
 # Standard libraries
 import math

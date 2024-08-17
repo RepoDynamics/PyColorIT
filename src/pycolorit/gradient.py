@@ -1,55 +1,66 @@
-"""Working with colors."""
+"""Create color gradients."""
+
+from typing import Literal as _Literal, Sequence as _Sequence
+
+import numpy as _np
+
+from pycolorit.color import RGBColor as _RGBColor
 
 
-# Non-standard libraries
-import numpy as np
-from pycolorit import rgb
-from pycolorit.color import Color
-
-
-def interpolate_rgb(
-    color_start: tuple[int, int, int] | Color,
-    color_end: tuple[int, int, int] | Color,
+def interpolate(
+    color_start: _RGBColor,
+    color_end: _RGBColor,
     count: int = 3,
-) -> Color:
-    """
-    Create intermediate colors between two given RGB colors.
+    system: _Literal["rgb", "hsl", "hsv", "hwb"] = "rgb",
+    multipliers: _Sequence[float] | None = None,
+    hue_wrap: bool = False,
+    return_array: bool = False,
+) -> list[_RGBColor] | _np.ndarray:
+    """Create a color gradient between two RGB colors.
 
     Parameters
     ----------
-    color_start : tuple[int, int, int]
-        Initial RGB color.
-    color_end : tuple[int, int, int], 0 <= int <= 255
-        Final RGB color.
-    count : int >= 0
+    color_start : RGBColor
+        Initial RGB color in the gradient.
+    color_end : RGBColor
+        Final RGB color in the gradient.
+    count : positive integer, default: 3
         Total number of returned colors. The initial and final colors,
         which are always part of the gradient, are included, i.e.
         for example `count=1` returns `[color_start]`, `count=2` returns
         `[color_start, color_end]`, and `count=3` returns
         `[color_start, intermediate_color_1, color_end]`.
-
+    system : {'rgb', 'hsl', 'hsv', 'hwb'}, default: 'rgb'
+        Coordinate system to use for interpolation.
+    multipliers : sequence of 3 or 4 numbers, optional
+        Multipliers for each component of the coordinate system;
+        either 3 numbers for the main components (e.g. RGB, HSL, HSV, HWB),
+        or 4 numbers to also include the alpha channel.
+    hue_wrap : bool, default: False
+        Only applicable to HSL, HSV, and HWB systems:
+        If True, the hue values of both start and end colors are wrapped before interpolation.
+    return_array : bool, default: False
+        If True, return the colors as a numpy array of color components instead of a list of RGBColor objects.
     Returns
     -------
-    colors : numpy.ndarray, shape: (count, 3)
-        RGB values starting with `color_start` and ending with `color_end`.
+    colors : list of RGBColor, or numpy.ndarray
+        Gradient colors starting with `color_start`.
     """
-    if not isinstance(count, int) or count <= 0:
-        raise ValueError("count must be positive integer")
-    c1 = (
-        rgb(color_start).rgb()[0]
-        if not isinstance(color_start, Color)
-        else color_start.rgb()[0].astype(int)
+    explicit_alpha = multipliers and len(multipliers) == 4
+    c1 = color_start.array(
+        system=system,
+        hue_wrap=hue_wrap,
+        explicit_alpha=explicit_alpha,
     )
-    c2 = (
-        rgb(color_end).rgb()[0]
-        if not isinstance(color_end, Color)
-        else color_end.rgb()[0].astype(int)
+    c2 = color_end.array(
+        system=system,
+        hue_wrap=hue_wrap,
+        explicit_alpha=explicit_alpha
     )
-    if count == 1:
-        return rgb(c1)
-    if count == 2:
-        return rgb([color_start, color_end])
     step = (c2 - c1) / (count - 1)
-    colors = ((np.arange(count)[..., np.newaxis] * step) + c1[np.newaxis, ...]).astype(np.uint8)
-    colors[-1] = c2
-    return rgb(colors)
+    if multipliers:
+        step *= _np.array(multipliers)
+    gradient = (_np.arange(count)[..., _np.newaxis] * step) + c1[_np.newaxis, ...]
+    if return_array:
+        return gradient
+    return [_RGBColor(system=system, values=color) for color in gradient]
