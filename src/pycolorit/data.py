@@ -13,6 +13,10 @@ def css_named_colors() -> dict:
     -------
     dict
         A dictionary of named CSS colors.
+
+    References
+    ----------
+    - https://github.com/bahamas10/css-color-names/blob/master/css-color-names.json
     """
     filepath = _data_dir_path / "css-named-colors.json"
     return _json.loads(filepath.read_bytes())
