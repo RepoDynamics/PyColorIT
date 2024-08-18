@@ -395,13 +395,12 @@ class RGBColor:
         if explicit_alpha and len(hxx) == 3:
             hxx = (*hxx, 1)
         hxx_array = _np.array(hxx)
-        if hue_unit != "turn":
-            hxx_array[0] = _conversion.convert_angle(
-                value=hxx_array[0],
-                source_unit="turn",
-                target_unit=hue_unit,
-                wrap=hue_wrap,
-            )
+        hxx_array[0] = _conversion.convert_angle(
+            value=hxx_array[0],
+            source_unit="turn",
+            target_unit=hue_unit,
+            wrap=hue_wrap,
+        )
         return hxx_array
 
     def _css_hxx(
