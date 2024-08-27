@@ -20,4 +20,3 @@ def css_named_colors() -> dict:
     """
     filepath = _data_dir_path / "css-named-colors.json"
     return _json.loads(filepath.read_bytes())
-
