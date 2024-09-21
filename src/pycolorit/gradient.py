@@ -1,10 +1,13 @@
 """Create color gradients."""
+from __future__ import annotations
 
-from typing import Literal as _Literal, Sequence as _Sequence
+from typing import Literal as _Literal, Sequence as _Sequence, TYPE_CHECKING as _TYPE_CHECKING
+
 
 import numpy as _np
 
 from pycolorit.color import RGBColor as _RGBColor
+from pycolorit import color as _color
 
 
 def interpolate(
@@ -47,6 +50,10 @@ def interpolate(
         Gradient colors starting with `color_start`.
     """
     explicit_alpha = multipliers and len(multipliers) == 4
+    if not isinstance(color_start, _RGBColor):
+        color_start = _color.css(str(color_start))
+    if not isinstance(color_end, _RGBColor):
+        color_end = _color.css(str(color_end))
     c1 = color_start.array(
         system=system,
         hue_wrap=hue_wrap,
