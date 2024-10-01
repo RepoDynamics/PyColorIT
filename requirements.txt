@@ -1,0 +1,3 @@
+numpy
+PkgData == 0.0.0.dev5
+ipython
