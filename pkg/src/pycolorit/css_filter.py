@@ -3,11 +3,25 @@
 References
 ----------
 - Code is re-implemented from JavaScript: https://codepen.io/sosuke/pen/Pjoqqp
+
+Example CSS filter generators:
+* https://isotropic.co/tool/hex-color-to-css-filter/
+* https://codepen.io/sosuke/pen/Pjoqqp
 """
 
-# Standard libraries
+from __future__ import annotations as _annotations
+
+from typing import TYPE_CHECKING as _TYPE_CHECKING
 import math
 import random
+
+if _TYPE_CHECKING:
+    from pycolorit.color import RGBColor
+
+
+def generate(target: RGBColor) -> tuple[list[float], float, str]:
+    color = Color(*target.rgb(ubyte=True))
+    return Solver(target_color=color).solve()
 
 
 class Color:
@@ -157,7 +171,7 @@ class Solver:
         self.target = target_color
         self.target_hsl = target_color.rgb_to_hsl()
 
-    def solve(self):
+    def solve(self) -> tuple[list[float], float, str]:
         curr_result = {"loss": float("inf")}
         for i in range(100):
             if curr_result["loss"] < 1:
@@ -254,6 +268,6 @@ class Solver:
             return round(filters[idx] * multiplier)
 
         return (
-            f"filter: invert({fmt(0)}%) sepia({fmt(1)}%) saturate({fmt(2)}%) hue-rotate({fmt(3, 3.6)}deg) "
+            f"invert({fmt(0)}%) sepia({fmt(1)}%) saturate({fmt(2)}%) hue-rotate({fmt(3, 3.6)}deg) "
             f"brightness({fmt(4)}%) contrast({fmt(5)}%);"
         )
