@@ -15,7 +15,7 @@ namespaces = true
 
 # ----------------------------------------- Project Metadata -------------------------------------
 [project]
-version = "0.0.0.dev9"
+version = "0.0.0.dev10"
 name = "PyColorIT"
 requires-python = ">=3.10"
 dependencies = [

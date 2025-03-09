@@ -269,5 +269,5 @@ class Solver:
 
         return (
             f"invert({fmt(0)}%) sepia({fmt(1)}%) saturate({fmt(2)}%) hue-rotate({fmt(3, 3.6)}deg) "
-            f"brightness({fmt(4)}%) contrast({fmt(5)}%);"
+            f"brightness({fmt(4)}%) contrast({fmt(5)}%)"
         )
