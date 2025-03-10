@@ -170,8 +170,11 @@ class Solver:
     def __init__(self, target_color: Color):
         self.target = target_color
         self.target_hsl = target_color.rgb_to_hsl()
+        self._random_state = None
+        return
 
-    def solve(self) -> tuple[list[float], float, str]:
+    def solve(self, random_seed: int = 0) -> tuple[list[float], float, str]:
+        self._random_state = random.Random(random_seed)
         curr_result = {"loss": float("inf")}
         for i in range(100):
             if curr_result["loss"] < 1:
@@ -213,7 +216,7 @@ class Solver:
         for k in range(iters):
             ck = c / ((k + 1) ** gamma)
             for i in range(6):
-                deltas[i] = 1 if random.random() > 0.5 else -1
+                deltas[i] = 1 if self._random_state.random() > 0.5 else -1
                 high_args[i] = values[i] + ck * deltas[i]
                 low_args[i] = values[i] - ck * deltas[i]
             loss_diff = self.loss(high_args) - self.loss(low_args)
