@@ -15,11 +15,11 @@ namespaces = true
 
 # ----------------------------------------- Project Metadata -------------------------------------
 [project]
-version = "0.0.0.dev11"
+version = "0.1.0"
 name = "PyColorIT"
 requires-python = ">=3.10"
 dependencies = [
     "numpy",
-    "PkgData == 0.0.0.dev5",
+    "PkgData >=0.1,<0.2",
     "ipython",
 ]
