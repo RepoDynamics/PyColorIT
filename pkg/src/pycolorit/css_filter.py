@@ -14,6 +14,7 @@ from __future__ import annotations as _annotations
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 import math
 import random
+import numpy as np
 
 if _TYPE_CHECKING:
     from pycolorit.color import RGBColor
@@ -27,78 +28,109 @@ def generate(target: RGBColor) -> tuple[list[float], float, str]:
 class Color:
     def __init__(self, r, g, b):
         self.set(r, g, b)
+        return
 
     def __str__(self):
         return f"rgb({round(self.r)}, {round(self.g)}, {round(self.b)})"
 
     def set(self, r, g, b):
-        self.r = self.clamp(r)
-        self.g = self.clamp(g)
-        self.b = self.clamp(b)
+        self.rgb = np.clip(np.array([r, g, b], dtype=np.float64), 0, 255)
+        self.r, self.g, self.b = self.rgb
+        return
 
     def hue_rotate(self, angle=0):
-        angle = angle / 180 * math.pi
-        sin = math.sin(angle)
-        cos = math.cos(angle)
-
-        self.multiply(
+        angle = np.radians(angle)
+        sin, cos = np.sin(angle), np.cos(angle)
+        matrix = np.array(
             [
-                0.213 + cos * 0.787 - sin * 0.213,
-                0.715 - cos * 0.715 - sin * 0.715,
-                0.072 - cos * 0.072 + sin * 0.928,
-                0.213 - cos * 0.213 + sin * 0.143,
-                0.715 + cos * 0.285 + sin * 0.140,
-                0.072 - cos * 0.072 - sin * 0.283,
-                0.213 - cos * 0.213 - sin * 0.787,
-                0.715 - cos * 0.715 + sin * 0.715,
-                0.072 + cos * 0.928 + sin * 0.072,
+                [
+                    0.213 + cos * 0.787 - sin * 0.213,
+                    0.715 - cos * 0.715 - sin * 0.715,
+                    0.072 - cos * 0.072 + sin * 0.928,
+                ],
+                [
+                    0.213 - cos * 0.213 + sin * 0.143,
+                    0.715 + cos * 0.285 + sin * 0.140,
+                    0.072 - cos * 0.072 - sin * 0.283,
+                ],
+                [
+                    0.213 - cos * 0.213 - sin * 0.787,
+                    0.715 - cos * 0.715 + sin * 0.715,
+                    0.072 + cos * 0.928 + sin * 0.072,
+                ],
             ]
         )
+        self.multiply(matrix)
+        return
 
     def grayscale(self, x=1):
-        self.multiply(
+        matrix = np.array(
             [
-                0.2126 + 0.7874 * (1 - x),
-                0.7152 - 0.7152 * (1 - x),
-                0.0722 - 0.0722 * (1 - x),
-                0.2126 - 0.2126 * (1 - x),
-                0.7152 + 0.2848 * (1 - x),
-                0.0722 - 0.0722 * (1 - x),
-                0.2126 - 0.2126 * (1 - x),
-                0.7152 - 0.7152 * (1 - x),
-                0.0722 + 0.9278 * (1 - x),
-            ]
+                [
+                    0.2126 + 0.7874 * (1 - x),
+                    0.7152 - 0.7152 * (1 - x),
+                    0.0722 - 0.0722 * (1 - x),
+                ],
+                [
+                    0.2126 - 0.2126 * (1 - x),
+                    0.7152 + 0.2848 * (1 - x),
+                    0.0722 - 0.0722 * (1 - x),
+                ],
+                [
+                    0.2126 - 0.2126 * (1 - x),
+                    0.7152 - 0.7152 * (1 - x),
+                    0.0722 + 0.9278 * (1 - x),
+                ],
+            ],
         )
+        self.multiply(matrix)
+        return
 
     def sepia(self, x=1):
-        self.multiply(
+        matrix = np.array(
             [
-                0.393 + 0.607 * (1 - x),
-                0.769 - 0.769 * (1 - x),
-                0.189 - 0.189 * (1 - x),
-                0.349 - 0.349 * (1 - x),
-                0.686 + 0.314 * (1 - x),
-                0.168 - 0.168 * (1 - x),
-                0.272 - 0.272 * (1 - x),
-                0.534 - 0.534 * (1 - x),
-                0.131 + 0.869 * (1 - x),
-            ]
+                [
+                    0.393 + 0.607 * (1 - x),
+                    0.769 - 0.769 * (1 - x),
+                    0.189 - 0.189 * (1 - x),
+                ],
+                [
+                    0.349 - 0.349 * (1 - x),
+                    0.686 + 0.314 * (1 - x),
+                    0.168 - 0.168 * (1 - x),
+                ],
+                [
+                    0.272 - 0.272 * (1 - x),
+                    0.534 - 0.534 * (1 - x),
+                    0.131 + 0.869 * (1 - x),
+                ],
+            ],
         )
+        self.multiply(matrix)
+        return
 
     def saturate(self, x=1):
-        self.multiply(
+        matrix = np.array(
             [
-                0.213 + 0.787 * x,
-                0.715 - 0.715 * x,
-                0.072 - 0.072 * x,
-                0.213 - 0.213 * x,
-                0.715 + 0.285 * x,
-                0.072 - 0.072 * x,
-                0.213 - 0.213 * x,
-                0.715 - 0.715 * x,
-                0.072 + 0.928 * x,
-            ]
+                [
+                    0.213 + 0.787 * x,
+                    0.715 - 0.715 * x,
+                    0.072 - 0.072 * x,
+                ],
+                [
+                    0.213 - 0.213 * x,
+                    0.715 + 0.285 * x,
+                    0.072 - 0.072 * x,
+                ],
+                [
+                    0.213 - 0.213 * x,
+                    0.715 - 0.715 * x,
+                    0.072 + 0.928 * x,
+                ],
+            ],
         )
+        self.multiply(matrix)
+        return
 
     def brightness(self, x=1):
         """
@@ -109,12 +141,9 @@ class Color:
         x : int >= 0
             Linear multiplier, with 0 creating a completely black color, 1 (i.e. 100%) having no effect,
             and values over 1 brightening the color.
-
-        Returns
-        -------
-
         """
-        self.multiply([x, 0, 0, 0, x, 0, 0, 0, x])
+        self.multiply(np.diag([x, x, x]))
+        return
 
     def contrast(self, x=1):
         """
@@ -124,45 +153,38 @@ class Color:
         ----------
         x : int >= 0
             A value of 0 makes the color grey, 1 (i.e. 100%) has no effect, and values over 1 create a contrast.
-
-        Returns
-        -------
-
         """
-        intercept = tuple(127.5 * (1 - x) for i in range(3))
-        self.multiply([x, 0, 0, 0, x, 0, 0, 0, x], intercept)
+        intercept = np.array([127.5 * (1 - x)] * 3)
+        self.multiply(np.diag([x, x, x]), intercept)
+        return
 
-    def clamp(self, value):
-        return min(255, max(0, value))
-
-    def multiply(self, matrix, vector=(0, 0, 0)):
-        r = self.r * matrix[0] + self.g * matrix[1] + self.b * matrix[2] + vector[0]
-        g = self.r * matrix[3] + self.g * matrix[4] + self.b * matrix[5] + vector[1]
-        b = self.r * matrix[6] + self.g * matrix[7] + self.b * matrix[8] + vector[2]
-        self.set(r, g, b)
+    def multiply(self, matrix, vector=None):
+        result = np.dot(matrix, self.rgb)
+        if vector is not None:
+            result += vector
+        self.set(*result)
+        return
 
     def invert(self, x=1):
-        r = (x + self.r / 255 * (1 - 2 * x)) * 255
-        g = (x + self.g / 255 * (1 - 2 * x)) * 255
-        b = (x + self.b / 255 * (1 - 2 * x)) * 255
-        self.set(r, g, b)
+        self.rgb = (x + self.rgb / 255 * (1 - 2 * x)) * 255
+        self.set(*self.rgb)
         return
 
     def rgb_to_hsl(self):
-        r, g, b = self.r / 255, self.g / 255, self.b / 255
-        max_value = max(r, g, b)
-        min_value = min(r, g, b)
-        h, s, l = 0, 0, (max_value + min_value) / 2
-        if max_value != min_value:
-            d = max_value - min_value
-            s = d / (2 - max_value - min_value) if l > 0.5 else d / (max_value + min_value)
-            if max_value == r:
-                h = (g - b) / d + (6 if g < b else 0)
-            elif max_value == g:
-                h = (b - r) / d + 2
-            else:
-                h = (r - g) / d + 4
-            h /= 6
+        rgb = self.rgb / 255
+        max_val, min_val = np.max(rgb), np.min(rgb)
+        l = (max_val + min_val) / 2
+        if max_val == min_val:
+            h = s = 0
+        else:
+            d = max_val - min_val
+            s = d / (2 - max_val - min_val) if l > 0.5 else d / (max_val + min_val)
+            idx = np.argmax(rgb)
+            h = [
+                (rgb[1] - rgb[2]) / d + (6 if rgb[1] < rgb[2] else 0),
+                (rgb[2] - rgb[0]) / d + 2,
+                (rgb[0] - rgb[1]) / d + 4
+            ][idx] / 6
         return h * 100, s * 100, l * 100
 
 
